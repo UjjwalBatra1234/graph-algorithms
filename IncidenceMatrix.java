@@ -16,7 +16,9 @@ public class IncidenceMatrix extends AbstractAssocGraph
 	 * Contructs empty graph.
 	 */
     public IncidenceMatrix() {
-    	// Implement me!
+    	// Implement me
+        //I'll write my code here
+
     } // end of IncidentMatrix()
 
 
