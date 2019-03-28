@@ -8,20 +8,37 @@ import java.util.*;
  *
  * @author Jeffrey Chan, 2019.
  */
-public class AdjList extends AbstractAssocGraph
-{
+public class AdjList extends AbstractAssocGraph {
+
+    Node head;
+
 
     /**
-	 * Contructs empty graph.
-	 */
+     * Contructs empty graph.
+     */
     public AdjList() {
-    	 // Implement me!
+        // Implement me!
 
     } // end of AdjList()
 
 
     public void addVertex(String vertLabel) {
-        // Implement me!
+        Node node = new Node();
+        node.myPair = new MyPair(vertLabel, 0); // weight is set to 0 since only a vertex is being created with no edges
+        node.next = null;
+
+        if (head == null) {
+            // If head is null it means that the this is the first vertex and therefore it should be the head
+            head = node;
+        } else {
+            // Otherwise create a temporary node to traverse the existing nodes until the last node is reached
+            Node tNode = head;
+            while (tNode.next != null) {
+                tNode = tNode.next;
+            }
+            // Place the new node at the end of the list of existing nodes
+            tNode.next = node;
+        }
     } // end of addVertex()
 
 
@@ -31,10 +48,10 @@ public class AdjList extends AbstractAssocGraph
 
 
     public int getEdgeWeight(String srcLabel, String tarLabel) {
-		    // Implement me!
+        // Implement me!
 
-		    // update return value
-		    return EDGE_NOT_EXIST;
+        // update return value
+        return EDGE_NOT_EXIST;
     } // end of existEdge()
 
 
@@ -77,8 +94,11 @@ public class AdjList extends AbstractAssocGraph
 
 
     protected class Node {
-    	public Node() {
 
-    	}
+        MyPair myPair;
+        Node next;
+
+        public Node() {
+        }
     }
 } // end of class AdjList
