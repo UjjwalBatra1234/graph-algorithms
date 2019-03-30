@@ -15,12 +15,13 @@ public class IncidenceMatrix extends AbstractAssocGraph {
 
     private HashMap<String, Integer> vertices = new HashMap<>();
     private HashMap<String, Integer> edges = new HashMap<>();
-    private int[][] incidenceMatrix = new int[this.vertices.size()][this.edges.size()];
+    private int[][] incidenceMatrix;
 
     /**
      * Contructs empty graph.
      */
     public IncidenceMatrix() {
+        this.incidenceMatrix = new int[0][0];
     } // end of IncidentMatrix()
 
 
@@ -99,23 +100,78 @@ public class IncidenceMatrix extends AbstractAssocGraph {
 
 
     public void removeVertex(String vertLabel) {
-        // Implement me!
+        String uppercaseVertLabel = vertLabel.toUpperCase();
+        // index row and column to be deleted
+        int colIndex = -1;
+        int rowIndex = -1;
+
+        String[] edgesToRemove = new String[this.incidenceMatrix[0].length];
+        int i = 0;
+
+        if (this.vertices.containsKey(uppercaseVertLabel)) {
+            rowIndex = this.vertices.get(uppercaseVertLabel);
+            this.vertices.remove(uppercaseVertLabel);
+
+            removeRow(rowIndex);
+
+            // delete edges of that vertex
+            for (String edge : this.edges.keySet()) {
+                if (edge.contains(uppercaseVertLabel)) {
+                    colIndex = this.edges.get(edge);
+
+                    edgesToRemove[i] = edge;
+                    i++;
+
+                    removeColumn(colIndex);
+                }
+            }
+//            TODO: fix error here
+        }
+
     } // end of removeVertex()
 
 
+    @SuppressWarnings("Duplicates")
     public List<MyPair> inNearestNeighbours(int k, String vertLabel) {
-        List<MyPair> neighbours = new ArrayList<MyPair>();
+        List<MyPair> neighbours = new ArrayList<>();
+        String uppercaseVertLabel = vertLabel.toUpperCase();
 
-        // Implement me!
+        for (String edge : this.edges.keySet()) {
+            String srcVertex = Character.toString(edge.charAt(0));
+            String tarVertex = Character.toString(edge.charAt(1));
+
+            if (uppercaseVertLabel.equals(tarVertex)) {
+                int edgeIndex = this.edges.get(edge);
+                int srcIndex = this.vertices.get(srcVertex);
+                int weight = this.incidenceMatrix[srcIndex][edgeIndex];
+
+                MyPair pair = new MyPair(srcVertex, weight);
+                neighbours.add(pair);
+            }
+        }
 
         return neighbours;
     } // end of inNearestNeighbours()
 
 
+    @SuppressWarnings("Duplicates")
     public List<MyPair> outNearestNeighbours(int k, String vertLabel) {
-        List<MyPair> neighbours = new ArrayList<MyPair>();
+        List<MyPair> neighbours = new ArrayList<>();
+        String uppercaseVertLabel = vertLabel.toUpperCase();
 
-        // Implement me!
+        for (String edge : this.edges.keySet()) {
+            String srcVertex = Character.toString(edge.charAt(0));
+            String tarVertex = Character.toString(edge.charAt(1));
+
+            if (uppercaseVertLabel.equals(srcVertex)) {
+                int edgeIndex = this.edges.get(edge);
+                int srcIndex = this.vertices.get(srcVertex);
+                int weight = this.incidenceMatrix[srcIndex][edgeIndex];
+
+                MyPair pair = new MyPair(tarVertex, weight);
+                neighbours.add(pair);
+            }
+        }
 
         return neighbours;
     } // end of outNearestNeighbours()
@@ -131,9 +187,16 @@ public class IncidenceMatrix extends AbstractAssocGraph {
 
     public void printEdges(PrintWriter os) {
         for (String edge : this.edges.keySet()) {
-            os.print(edge + " ");
+
+            String srcVertex = Character.toString(edge.charAt(0));
+            String tarVertex = Character.toString(edge.charAt(1));
+
+            int srcVertexIndex = this.vertices.get(srcVertex);
+            int edgeIndex = this.edges.get(edge);
+            int weight = this.incidenceMatrix[srcVertexIndex][edgeIndex];
+
+            os.printf("%s %s %d\n", srcVertex, tarVertex, weight);
         }
-        os.println();
     } // end of printEdges()
 
     private void addRow() {
@@ -143,6 +206,64 @@ public class IncidenceMatrix extends AbstractAssocGraph {
         int[][] newMatrix = new int[numRows][numCols];
 
         for (int row = 0; row < numRows - 1; row++) {
+            for (int col = 0; col < numCols; col++) {
+                newMatrix[row][col] = this.incidenceMatrix[row][col];
+            }
+        }
+
+        this.incidenceMatrix = newMatrix;
+    }
+
+    private void removeRow(int index) {
+        int numRows = this.incidenceMatrix.length - 1;
+        int lastRow = this.incidenceMatrix.length - 1;
+        int numCols = this.incidenceMatrix[0].length;
+        int[][] newMatrix = new int[numRows][numCols];
+
+        // swap row to be deleted with last row
+        if (index != this.incidenceMatrix.length - 1) {
+            for (int i = 0; i < numCols; i++) {
+                this.incidenceMatrix[index][i] = this.incidenceMatrix[lastRow][i];
+            }
+            // update last vertex's new index
+            for (String vertex : this.vertices.keySet()) {
+                if (this.vertices.get(vertex).equals(lastRow)) {
+                    this.vertices.put(vertex, index);
+                }
+            }
+        }
+
+        // delete last row
+        for (int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numCols; col++) {
+                newMatrix[row][col] = this.incidenceMatrix[row][col];
+            }
+        }
+
+        this.incidenceMatrix = newMatrix;
+    }
+
+    private void removeColumn(int index) {
+        int numRows = this.incidenceMatrix.length;
+        int lastColumn = this.incidenceMatrix.length - 1;
+        int numCols = this.incidenceMatrix[0].length - 1;
+        int[][] newMatrix = new int[numRows][numCols];
+
+        // swap column to be deleted with last column
+        if (index != this.incidenceMatrix[0].length - 1) {
+            for (int i = 0; i < numCols; i++) {
+                this.incidenceMatrix[i][index] = this.incidenceMatrix[i][lastColumn];
+            }
+            // update last vertex's new index
+            for (String edge : this.edges.keySet()) {
+                if (this.edges.get(edge).equals(lastColumn)) {
+                    this.vertices.put(edge, index);
+                }
+            }
+        }
+
+        // delete last column
+        for (int row = 0; row < numRows; row++) {
             for (int col = 0; col < numCols; col++) {
                 newMatrix[row][col] = this.incidenceMatrix[row][col];
             }
