@@ -32,6 +32,7 @@ public class AdjList extends AbstractAssocGraph {
                 tempArr[i] = vertArr[i];
             tempArr[vertCount] = new Vertex(vertLabel);
             vertArr = tempArr;
+
         }
     } // end of addVertex()
 
