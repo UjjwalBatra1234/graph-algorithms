@@ -41,12 +41,13 @@ public class IncidenceMatrix extends AbstractAssocGraph {
 
         //insert edge only if it does not exist and source and target exists
         if (!this.edges.containsKey(newEdge.key)
+                && weight != 0
                 && this.vertices.containsKey(newEdge.source)
                 && this.vertices.containsKey(newEdge.target)) {
             this.addColumn();
             this.edges.put(newEdge.key, this.incidenceMatrix[0].length - 1);
+            this.addEdgeWeight(newEdge, weight);
         }
-        this.addEdgeWeight(newEdge, weight);
 
     } // end of addEdge()
 
@@ -67,7 +68,14 @@ public class IncidenceMatrix extends AbstractAssocGraph {
     public void updateWeightEdge(String srcLabel, String tarLabel, int weight) {
         Edge edge = new Edge(srcLabel, tarLabel);
 
-        addEdgeWeight(edge, weight);
+        String[] edgeToRemove = new String[1];
+        edgeToRemove[0] = edge.key;
+
+        if (weight == 0) {
+            this.deleteEdge(edgeToRemove, 1);
+        } else {
+            addEdgeWeight(edge, weight);
+        }
     } // end of updateWeightEdge()
 
     private void addEdgeWeight(Edge edge, int weight) {
@@ -86,8 +94,8 @@ public class IncidenceMatrix extends AbstractAssocGraph {
     public void removeVertex(String vertLabel) {
         String uppercaseVertLabel = vertLabel.toUpperCase();
         // index row and column to be deleted
-        int colIndex = -1;
-        int rowIndex = -1;
+        int colIndex;
+        int rowIndex;
 
         String[] edgesToRemove = new String[this.incidenceMatrix[0].length];
         int i = 0;
@@ -101,23 +109,28 @@ public class IncidenceMatrix extends AbstractAssocGraph {
             // delete edges of that vertex
             for (String edge : this.edges.keySet()) {
                 if (edge.contains(uppercaseVertLabel)) {
-                    colIndex = this.edges.get(edge);
-
                     edgesToRemove[i] = edge;
                     i++;
 
-                    removeColumn(colIndex);
                 }
             }
 
-            //remove all redundant edges
-            for (int j = 0; j <= i; j++) {
-                String edge = edgesToRemove[j];
-                this.edges.remove(edge);
-            }
-
+            this.deleteEdge(edgesToRemove, i);
         }
     } // end of removeVertex()
+
+    private void deleteEdge(String[] edgesToRemove, int i) {
+
+        //remove all redundant edges
+        for (int j = 0; j < i; j++) {
+            if (!this.edges.containsKey(edgesToRemove[j]))
+                continue;
+
+            int colIndex = this.edges.get(edgesToRemove[j]);
+            removeColumn(colIndex);
+            this.edges.remove(edgesToRemove[j]);
+        }
+    }
 
 
     @SuppressWarnings("Duplicates")
@@ -136,6 +149,14 @@ public class IncidenceMatrix extends AbstractAssocGraph {
 
                 MyPair pair = new MyPair(srcVertex, weight);
                 neighbours.add(pair);
+            }
+        }
+
+        if (k > -1) {
+            neighbours = sortNearestNeighbours(neighbours);
+
+            for (int i = k; i < neighbours.size(); i++) {
+                neighbours.remove(i);
             }
         }
 
@@ -162,9 +183,35 @@ public class IncidenceMatrix extends AbstractAssocGraph {
             }
         }
 
+        if (k > -1) {
+            neighbours = sortNearestNeighbours(neighbours);
+
+            for (int i = k; i < neighbours.size(); i++) {
+                neighbours.remove(i);
+            }
+        }
+
         return neighbours;
     } // end of outNearestNeighbours()
 
+    public List<MyPair> sortNearestNeighbours(List<MyPair> neighbours) {
+
+        for (int i = 0; i < neighbours.size(); i++){
+            int max = i;
+            for (int j = i; j < neighbours.size(); j++) {
+                if (neighbours.get(j).getValue() > neighbours.get(i).getValue()){
+                    max = j;
+                }
+            }
+
+            if (max != i) {
+                MyPair temp = neighbours.get(max);
+                neighbours.set(max, neighbours.get(i));
+                neighbours.set(i, temp);
+            }
+        }
+        return neighbours;
+    }
 
     public void printVertices(PrintWriter os) {
         for (String vertex : this.vertices.keySet()) {
@@ -240,7 +287,7 @@ public class IncidenceMatrix extends AbstractAssocGraph {
 
         // swap column to be deleted with last column
         if (index != this.incidenceMatrix[0].length - 1) {
-            for (int i = 0; i < numCols; i++) {
+            for (int i = 0; i < this.incidenceMatrix.length; i++) {
                 this.incidenceMatrix[i][index] = this.incidenceMatrix[i][currLastColumn];
             }
             // update last vertex's new index
