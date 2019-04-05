@@ -100,6 +100,9 @@ public class AdjList extends AbstractAssocGraph {
      */
     public void removeVertex(String vertLabel) {
         int verInt = getVertIndex(vertLabel);
+        if (verInt < 0)
+            return;
+
         int vertArrLength = vertArr.length;
 
         //create temp array of n-1 length to fill with all of the remaining elements
@@ -171,20 +174,21 @@ public class AdjList extends AbstractAssocGraph {
      */
     public List<MyPair> outNearestNeighbours(int k, String vertLabel) {
         List<MyPair> neighbours = new ArrayList<MyPair>();
-        Node head = getVertex(vertLabel).edgeList.head;
+        EdgeList edgeList = getVertex(vertLabel).edgeList;
+        int degrees = edgeList.edgeCount;
+        if(k != -1 && k != degrees)
+            edgeList.sort();
+        else
+            k = degrees;
 
-        if (head == null)
-            return null;
+        int i = 0;
+        Node tNode = edgeList.tail;
 
-        Node tNode = head; //traverse node to traverse the EdgeList
-        MyPair myPair;
-        while (tNode != null) {
-            myPair = tNode.myPair;
-            if (myPair.getValue() > k)
-                neighbours.add(myPair);
-            tNode = tNode.next;
+        while(tNode != null && i<k) {
+            neighbours.add(tNode.myPair);
+            tNode=tNode.previous;
+            i++;
         }
-
         return neighbours;
     } // end of outNearestNeighbours()
 
@@ -290,8 +294,9 @@ public class AdjList extends AbstractAssocGraph {
      * This class is essentially a LinkedList class but for MyPair types only
      */
     protected class EdgeList {
-        Node head;
-        Node tail;
+        private Node head;
+        private Node tail;
+        private int edgeCount;
 
         /**
          * @param myPair
@@ -311,6 +316,7 @@ public class AdjList extends AbstractAssocGraph {
             }
             // now the new tail is the new node
             tail = node;
+            edgeCount++;
         }
 
         /**
@@ -359,6 +365,7 @@ public class AdjList extends AbstractAssocGraph {
          * removes the desired edge by removing the corresponding links in the EdgeList (LinkedList). If the edge being
          * deleted is either the head or tail of the EdgeList (LinkedList) the head and tail of the list are also
          * updated
+         *
          * @param vertLabel
          * @throws EmptyEdgeListException
          * @throws EdgeDoesNotExistException
@@ -370,35 +377,82 @@ public class AdjList extends AbstractAssocGraph {
 
             if (head == tail) {         // edge is the only item in the list
                 head = tail = null;     // simply set head and tail to null
-            }
-            else if (node == tail) {    // edge is the last element in the list.
+            } else if (node == tail) {    // edge is the last element in the list.
                 tail = node.previous;   // set second last node as new last node
                 tail.next = null;       // set onward pointer of the last node to null
-            }
-            else if (node == head) {    // edge is the first element in the list
+            } else if (node == head) {    // edge is the first element in the list
                 head = node.next;       // set the second node as the new head node
                 head.previous = null;   // set the backward pointer of the head node to null
-            }
-            else {                      // node is in the middle of the list therefore all links to it must be removed
+            } else {                      // node is in the middle of the list therefore all links to it must be removed
                 previousNode.next = nextNode;
                 nextNode.previous = previousNode;
             }
+            edgeCount--;
+        }
+
+        private void swapNodes(Node nodeA, Node nodeB) {
+            MyPair tempPair = nodeA.myPair;
+
+            nodeA.myPair = nodeB.myPair;
+            nodeB.myPair = tempPair;
+        }
+
+        public void sort() {
+            quickSort(this, head, tail);
+        }
+
+        private void quickSort(EdgeList edgeList, Node subHead, Node subTail) {
+            if (subHead != subTail && subHead != null && subTail != null) {
+                Node pNode = getPartitionNode(edgeList, subHead, subTail);
+
+                // Because the linked list is being constantly split up, we need to make sure that the sublists do not
+                // connect to other sublists, therefore the subHead.prev reference and subTail.next reference are
+                // temporarily set to null. subHeadPrev and subTaiNext have been set up to hold the references until the
+                // lists are sorted. The list will be relinked after the base case has been met
+                Node subHeadPrev = subHead.previous;
+                Node subTailNext = subTail.next;
+                subHead.previous = subTail.next = null;
+
+                quickSort(edgeList, subHead, pNode.previous);
+                quickSort(edgeList, pNode.next, subTail);
+
+                // re-link up sorted list
+                subHead.previous = subHeadPrev;
+                subTail.next = subTailNext;
+
+            }
+        }
+
+        private Node getPartitionNode(EdgeList edgeList, Node subHead, Node subTail) {
+            Node pivotNode = subTail;
+            Node partitionNode = subHead;
+            Node tNode = subHead;
+            while (tNode != subTail) {
+                if (tNode.myPair.getValue() <= pivotNode.myPair.getValue()) {
+                    swapNodes(tNode, partitionNode);
+                    partitionNode = partitionNode.next;
+                }
+                tNode = tNode.next;
+            }
+            swapNodes(partitionNode, pivotNode);
+            return partitionNode;
         }
     }
 
-    protected class GraphAlgorithmsException extends Exception {
-    }
+        protected class GraphAlgorithmsException extends Exception {
+        }
 
-    protected class EmptyEdgeListException extends GraphAlgorithmsException {
-    }
+        protected class EmptyEdgeListException extends GraphAlgorithmsException {
+        }
 
-    protected class EdgeDoesNotExistException extends GraphAlgorithmsException {
-    }
+        protected class EdgeDoesNotExistException extends GraphAlgorithmsException {
+        }
 
 
-    //TODO: REMOVE METHODS UNDER HERE:
-    public Vertex[] getVertArr() {
-        return vertArr;
-    }
+        //TODO: REMOVE METHODS UNDER HERE:
+        public Vertex[] getVertArr() {
+            return vertArr;
+        }
 
-} // end of class AdjList
+    } // end of class AdjList
+
