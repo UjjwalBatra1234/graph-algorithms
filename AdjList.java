@@ -12,12 +12,19 @@ public class AdjList extends AbstractAssocGraph {
 
 
     private Vertex[] vertArr = null;
+    int newVertPos;
+    int arrLen;
+    Map<String, Integer> vertMap;
+
 
     /**
      * Contructs empty graph.
      */
     public AdjList() {
-        // Implement me!
+        vertArr = new Vertex[1000];
+        newVertPos = 0;
+        arrLen = vertArr.length;
+        vertMap = new HashMap<String, Integer>();
 
     } // end of AdjList()
 
@@ -28,18 +35,19 @@ public class AdjList extends AbstractAssocGraph {
      * @param vertLabel Vertex to add.
      */
     public void addVertex(String vertLabel) {
-        if (vertArr == null) {
-            vertArr = new Vertex[1];
-            vertArr[0] = new Vertex(vertLabel);
-        } else {
-            int vertCount = vertArr.length;
-            Vertex[] tempArr = new Vertex[vertCount + 1];
-            for (int i = 0; i < vertCount; i++)
-                tempArr[i] = vertArr[i];
-            tempArr[vertCount] = new Vertex(vertLabel);
-            vertArr = tempArr;
 
+        // if the new vertex position
+        if (newVertPos == arrLen) {
+            Vertex[] tempArr = new Vertex[arrLen * 2];
+            for (int i = 0; i < arrLen; i++)
+                tempArr[i] = vertArr[i];
+            vertArr = tempArr;
         }
+
+        vertArr[newVertPos] = new Vertex(vertLabel);
+        vertMap.put(vertLabel, newVertPos);
+        newVertPos++;
+
     } // end of addVertex()
 
     /**
@@ -99,35 +107,16 @@ public class AdjList extends AbstractAssocGraph {
      * @param vertLabel Vertex to remove.
      */
     public void removeVertex(String vertLabel) {
-        int verInt = getVertIndex(vertLabel);
-        if (verInt < 0)
-            return;
 
-        int vertArrLength = vertArr.length;
+        vertMap.remove(vertLabel);
 
-        //create temp array of n-1 length to fill with all of the remaining elements
-        Vertex[] tempArr = new Vertex[vertArrLength - 1];
-
-        //fill tempArray up to the index of the Vertex being deleted
-        for (int i = 0; i < verInt; i++) {
-            tempArr[i] = vertArr[i];
-        }
-        //resume filling the tempArray with all the elements past the Vertex being deleted
-        for (int i = verInt + 1; i < vertArrLength; i++)
-            tempArr[i - 1] = vertArr[i];
-
-        // set the vertex array to the temp array
-        vertArr = tempArr;
-        vertArrLength = vertArr.length;
-
-        //the loop below removes all the edges which contained the vertex being deleted
-        for (int i = 0; i < vertArrLength; i++) {
+        for (String vLabel : vertMap.keySet()) {
+            Vertex vertex = getVertex(vLabel);
             try {
-                vertArr[i].edgeList.removeEdge(vertLabel);
+                vertex.edgeList.removeEdge(vertLabel);
             } catch (GraphAlgorithmsException e) {
             }
         }
-
     } // end of removeVertex()
 
     /**
@@ -176,7 +165,7 @@ public class AdjList extends AbstractAssocGraph {
         List<MyPair> neighbours = new ArrayList<MyPair>();
         EdgeList edgeList = getVertex(vertLabel).edgeList;
         int degrees = edgeList.edgeCount;
-        if(k != -1 && k != degrees)
+        if (k != -1 && k != degrees)
             edgeList.sort();
         else
             k = degrees;
@@ -184,9 +173,9 @@ public class AdjList extends AbstractAssocGraph {
         int i = 0;
         Node tNode = edgeList.tail;
 
-        while(tNode != null && i<k) {
+        while (tNode != null && i < k) {
             neighbours.add(tNode.myPair);
-            tNode=tNode.previous;
+            tNode = tNode.previous;
             i++;
         }
         return neighbours;
@@ -235,11 +224,9 @@ public class AdjList extends AbstractAssocGraph {
      */
     private Vertex getVertex(String vertLabel) {
 
-        int vertIndex = getVertIndex(vertLabel);
-        if (vertIndex >= 0)
-            return vertArr[vertIndex];
+        int vertIndex = vertMap.get(vertLabel);
+        return vertArr[vertIndex];
 
-        return null;
     }
 
     /**
@@ -439,20 +426,20 @@ public class AdjList extends AbstractAssocGraph {
         }
     }
 
-        protected class GraphAlgorithmsException extends Exception {
-        }
+    protected class GraphAlgorithmsException extends Exception {
+    }
 
-        protected class EmptyEdgeListException extends GraphAlgorithmsException {
-        }
+    protected class EmptyEdgeListException extends GraphAlgorithmsException {
+    }
 
-        protected class EdgeDoesNotExistException extends GraphAlgorithmsException {
-        }
+    protected class EdgeDoesNotExistException extends GraphAlgorithmsException {
+    }
 
 
-        //TODO: REMOVE METHODS UNDER HERE:
-        public Vertex[] getVertArr() {
-            return vertArr;
-        }
+    //TODO: REMOVE METHODS UNDER HERE:
+    public Vertex[] getVertArr() {
+        return vertArr;
+    }
 
-    } // end of class AdjList
+} // end of class AdjList
 
