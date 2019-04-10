@@ -37,8 +37,8 @@ public class AdjList extends AbstractAssocGraph {
     public void addVertex(String vertLabel) {
         if (newVertPos == arrLen) {
             Vertex[] tempArr = new Vertex[arrLen * 2];
-            for (int i = 0; i < arrLen; i++)
-                tempArr[i] = vertArr[i];
+            System.arraycopy(vertArr,0,tempArr,0,arrLen);
+            arrLen = arrLen *2;
             vertArr = tempArr;
         }
 
