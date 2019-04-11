@@ -32,19 +32,23 @@ public class AdjList extends AbstractAssocGraph {
      * Adds a new vertex to the next available position in the vertex array. if the new position is beyond the available
      * index a new array that's double the size is created. all the values are passed into the new array and the vertex
      * is added in the new position
+     *
      * @param vertLabel Vertex to add.
      */
     public void addVertex(String vertLabel) {
-        if (newVertPos == arrLen) {
-            Vertex[] tempArr = new Vertex[arrLen * 2];
-            System.arraycopy(vertArr,0,tempArr,0,arrLen);
-            arrLen = arrLen *2;
-            vertArr = tempArr;
+        if (vertMap.get(vertLabel) == null) {
+            if (newVertPos == arrLen) {
+                Vertex[] tempArr = new Vertex[arrLen * 2];
+                System.arraycopy(vertArr, 0, tempArr, 0, arrLen);
+                arrLen = arrLen * 2;
+                vertArr = tempArr;
+            }
+
+            vertArr[newVertPos] = new Vertex(vertLabel);
+            vertMap.put(vertLabel, newVertPos);
+            newVertPos++;
         }
 
-        vertArr[newVertPos] = new Vertex(vertLabel);
-        vertMap.put(vertLabel, newVertPos);
-        newVertPos++;
 
     } // end of addVertex()
 
@@ -54,10 +58,11 @@ public class AdjList extends AbstractAssocGraph {
      * @param weight   Integer weight to add between edges.
      */
     public void addEdge(String srcLabel, String tarLabel, int weight) {
-        Vertex srcVertex = getVertex(srcLabel);
-
-        if (getVertex(tarLabel) != null)
-            srcVertex.edgeList.addEdge(new MyPair(tarLabel, weight));
+        if (getVertex(srcLabel) != null && getVertex(tarLabel) != null) {
+            EdgeList edgeList = getVertex(srcLabel).edgeList;
+            if(!edgeList.edgeExists(tarLabel))
+                edgeList.addEdge(new MyPair(tarLabel, weight));
+        }
     } // end of addEdge()
 
 
@@ -76,6 +81,7 @@ public class AdjList extends AbstractAssocGraph {
             System.err.println("Graph Algorithm Exception " + e);
         }
         return EDGE_NOT_EXIST;
+
     } // end of existEdge()
 
     /**
@@ -99,6 +105,7 @@ public class AdjList extends AbstractAssocGraph {
     /**
      * The vertex reference is removed form the map and all of the edges pointing to the vertex are removed from the
      * other vertices
+     *
      * @param vertLabel Vertex to remove.
      */
     public void removeVertex(String vertLabel) {
@@ -118,9 +125,9 @@ public class AdjList extends AbstractAssocGraph {
      * Traverses the entire graph looking for edge connections with the desired vertex. "OutPais" are created and added
      * to an EdgeList (LinkedList). The nearest neighbors are then returned using the nearestNeighbors method from the
      * Edgelist class
-     * @param k the number of neighbours requested
-     * @param vertLabel Vertex to find the in-neighbourhood for.
      *
+     * @param k         the number of neighbours requested
+     * @param vertLabel Vertex to find the in-neighbourhood for.
      * @return k nearest neighbours in descending weight
      */
     public List<MyPair> inNearestNeighbours(int k, String vertLabel) {
@@ -132,7 +139,7 @@ public class AdjList extends AbstractAssocGraph {
 
         for (String vLabel : vertMap.keySet()) {
             Vertex vertex = getVertex(vLabel);
-                head = vertex.edgeList.head;
+            head = vertex.edgeList.head;
             if (head != null) {
                 tNode = head;
                 while (tNode != null) {
@@ -152,7 +159,8 @@ public class AdjList extends AbstractAssocGraph {
 
     /**
      * Returns k nearest neighbours from the requested vertex using the nearestNeighbours method from the EdgeList Class
-     * @param k number of neighbours requested
+     *
+     * @param k         number of neighbours requested
      * @param vertLabel Vertex to find the out-neighbourhood for.
      * @return list of out neighbors within k weight
      */
@@ -162,17 +170,19 @@ public class AdjList extends AbstractAssocGraph {
 
     /**
      * Prints all of the vertices within the AdjacencyList
+     *
      * @param os PrinterWriter to print to.
      */
     public void printVertices(PrintWriter os) {
 
-        for(String vertLabel: vertMap.keySet()){
+        for (String vertLabel : vertMap.keySet()) {
             os.print(vertLabel + " ");
         }
     } // end of printVertices()
 
     /**
      * Traverses the entire AdjacencyList to print all of the edges
+     *
      * @param os PrinterWriter to print to.
      */
     public void printEdges(PrintWriter os) {
@@ -180,7 +190,7 @@ public class AdjList extends AbstractAssocGraph {
         Node tNode;
         MyPair tMyPair;
 
-        for(String vertLabel: vertMap.keySet()){
+        for (String vertLabel : vertMap.keySet()) {
             head = getVertex(vertLabel).edgeList.head;
             os.print(vertLabel + " ");
             if (head != null) {
@@ -196,16 +206,20 @@ public class AdjList extends AbstractAssocGraph {
         }
     } // end of printEdges()
 
-        /**
-         * returns the requested vertex using the getVertexIndex method.
-         * @param vertLabel
-         * @return desired vertex object if found. returns null if it isn't
-         */
+    /**
+     * returns the requested vertex using the getVertexIndex method.
+     *
+     * @param vertLabel
+     * @return desired vertex object if found. returns null if it isn't
+     */
     private Vertex getVertex(String vertLabel) {
 
-        int vertIndex = vertMap.get(vertLabel);
-        return vertArr[vertIndex];
-
+        try {
+            int vertIndex = vertMap.get(vertLabel);
+            return vertArr[vertIndex];
+        }catch (NullPointerException e){
+            return null;
+        }
     }
 
     /**
@@ -272,6 +286,7 @@ public class AdjList extends AbstractAssocGraph {
 
         /**
          * Get's the Node with the corresponding vertLabel and then return the MyPair within the node
+         *
          * @param vertLabel
          * @return MyPair
          * @throws EmptyEdgeListException
@@ -283,8 +298,9 @@ public class AdjList extends AbstractAssocGraph {
         }
 
         /**
-        * Get's the Node with the corresponding vertLabel and then replaces the MyPair object with a new MyPair object
+         * Get's the Node with the corresponding vertLabel and then replaces the MyPair object with a new MyPair object
          * with the desired weight
+         *
          * @param vertLabel
          * @param weight
          * @throws EmptyEdgeListException
@@ -297,6 +313,7 @@ public class AdjList extends AbstractAssocGraph {
 
         /**
          * Traverses the EdgeList until the edge with the requested vertLabel is found.
+         *
          * @param vertLabel
          * @return the node corresponding to the requested vertex label
          * @throws EmptyEdgeListException
@@ -348,6 +365,7 @@ public class AdjList extends AbstractAssocGraph {
         /**
          * This class actually only swaps the MyPair objects within the nodes to give the effect of actually swapping
          * the nodes
+         *
          * @param nodeA
          * @param nodeB
          */
@@ -367,6 +385,7 @@ public class AdjList extends AbstractAssocGraph {
 
         /**
          * Quicksort implementation
+         *
          * @param edgeList
          * @param subHead
          * @param subTail
@@ -395,6 +414,7 @@ public class AdjList extends AbstractAssocGraph {
         /**
          * Most of the heavy lifting of the quicksort algorithm is done within this method. All items left of the pivot
          * must be smaller and all items right of the pivot must be larger
+         *
          * @param edgeList
          * @param subHead
          * @param subTail
@@ -420,10 +440,11 @@ public class AdjList extends AbstractAssocGraph {
          * returned. Otherwise the list is sorted in order to find the nearest neighbors. In this implementation the
          * nearest neighbours are those with the highest weights. If the user passes in a k value of -1 the entire
          * unsorted list is returned to the user
+         *
          * @param k
          * @return
          */
-        public List<MyPair> nearestNeighbors(int k){
+        public List<MyPair> nearestNeighbors(int k) {
             List<MyPair> neighbours = new ArrayList<MyPair>();
 
             int degrees = this.edgeCount;
@@ -442,6 +463,18 @@ public class AdjList extends AbstractAssocGraph {
             }
 
             return neighbours;
+        }
+
+        public boolean edgeExists(String vertLabel){
+            Node tNode;
+            tNode = head;
+
+            while(tNode != null){
+                if(tNode.myPair.getKey().compareTo(vertLabel) == 0)
+                    return true;
+                tNode = tNode.next;
+            }
+            return  false;
         }
     }
 
