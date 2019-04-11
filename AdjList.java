@@ -178,6 +178,7 @@ public class AdjList extends AbstractAssocGraph {
         for (String vertLabel : vertMap.keySet()) {
             os.print(vertLabel + " ");
         }
+        os.println();
     } // end of printVertices()
 
     /**
@@ -201,7 +202,7 @@ public class AdjList extends AbstractAssocGraph {
                     tNode = tNode.next;
                 }
             }
-            os.print("\n");
+            os.println();
 
         }
     } // end of printEdges()
