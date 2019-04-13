@@ -108,7 +108,10 @@ public class GraphEval
 								System.err.println(lineNum + ": edge weight must be non-negative.");
 							}
 							else {
+								long startUTime = System.nanoTime();
 								graph.updateWeightEdge(tokens[1], tokens[2], weight);
+								long stopUTime = System.nanoTime();
+								System.out.println("Update Edge Time: " + startUTime-startUTime);
 							}
 						}
 						else {
@@ -118,7 +121,11 @@ public class GraphEval
 					// remove vertex
 					case "RV":
 						if (tokens.length == 2) {
+							long startRVTime = System.nanoTime();
 							graph.removeVertex(tokens[1]);
+							long stopRVTime = System.nanoTime();
+							System.out.println("Remove Vertex Time: " + startRVTime-stopRVTime);
+
 						}
 						else {
 							System.err.println(lineNum + ": incorrect number of tokens.");
@@ -127,7 +134,11 @@ public class GraphEval
 					// k-nearest out-neighbourhood
 					case "ON":
 						if (tokens.length == 3) {
+							long startONTime = System.nanoTime();
 							List<MyPair> neighbours = graph.outNearestNeighbours(Integer.parseInt(tokens[1]), tokens[2]);
+							long stopONTime = System.nanoTime();
+							System.out.println("Out Nearest Neighbours Time: " + startONTime-stopONTime);
+
 							StringBuffer buf = new StringBuffer();
 							for (MyPair neigh : neighbours) {
 								buf.append(" (" + neigh.getKey() + "," + neigh.getValue() + ")");
@@ -143,7 +154,11 @@ public class GraphEval
 					// k-nearest in-neighbourhood
 					case "IN":
 						if (tokens.length == 3) {
+							long startINTime = System.nanoTime();
 							List<MyPair> neighbours = graph.inNearestNeighbours(Integer.parseInt(tokens[1]), tokens[2]);
+							long startINTime = System.nanoTime();
+							System.out.println("In Nearest Neighbours Time: " + startINTime-startINTime);
+
 							StringBuffer buf = new StringBuffer();
 							for (MyPair neigh : neighbours) {
 								buf.append(" (" + neigh.getKey() + "," + neigh.getValue() + ")");
@@ -250,6 +265,7 @@ public class GraphEval
 				System.err.println("Unknown implmementation type.");
 				usage(progName);
 		}
+
 
 
 		// if file specified, then load file
