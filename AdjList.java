@@ -14,7 +14,7 @@ import java.util.Map;
 public class AdjList extends AbstractAssocGraph {
 
 
-    private Vertex[] vertArr = null;
+    private Vertex[] vertArr;
     int newVertPos;
     int arrLen;
     Map<String, Integer> vertMap;
@@ -171,6 +171,9 @@ public class AdjList extends AbstractAssocGraph {
      * @return list of out neighbors within k weight
      */
     public List<MyPair> outNearestNeighbours(int k, String vertLabel) {
+        if (getVertex(vertLabel) == null) {
+            return new ArrayList();
+        }
         return getVertex(vertLabel).edgeList.nearestNeighbors(k);
     } // end of outNearestNeighbours()
 
