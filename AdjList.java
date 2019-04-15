@@ -27,7 +27,7 @@ public class AdjList extends AbstractAssocGraph {
         vertArr = new Vertex[1000];
         newVertPos = 0;
         arrLen = vertArr.length;
-        vertMap = new HashMap<String, Integer>();
+        vertMap = new HashMap<>();
 
     } // end of AdjList()
 
@@ -76,15 +76,15 @@ public class AdjList extends AbstractAssocGraph {
      * @return
      */
     public int getEdgeWeight(String srcLabel, String tarLabel) {
-        Vertex srcVertex = getVertex(srcLabel);
 
         try {
+            Vertex srcVertex = getVertex(srcLabel);
             MyPair myPair = srcVertex.edgeList.getEdge(tarLabel);
             return myPair.getValue();
-        } catch (GraphAlgorithmsException e) {
-            System.err.println("Graph Algorithm Exception " + e);
+        } catch (GraphAlgorithmsException | NullPointerException e) {
+            return EDGE_NOT_EXIST;
         }
-        return EDGE_NOT_EXIST;
+
 
     } // end of existEdge()
 
@@ -94,15 +94,15 @@ public class AdjList extends AbstractAssocGraph {
      * @param weight   Weight to update edge to.  If weight = 0, delete the edge.
      */
     public void updateWeightEdge(String srcLabel, String tarLabel, int weight) {
-        Vertex srcVertex = getVertex(srcLabel);
 
         try {
+            Vertex srcVertex = getVertex(srcLabel);
             if (weight == 0)
                 srcVertex.edgeList.removeEdge(tarLabel);
             else
                 srcVertex.edgeList.updateEdgeWeight(tarLabel, weight);
-        } catch (GraphAlgorithmsException e) {
-            System.err.println("Graph Algorithm Exception " + e);
+        } catch (GraphAlgorithmsException | NullPointerException e) {
+            System.err.println("Graph Algorithm Exception - Error Can't Update Weight");
         }
     } // end of updateWeightEdge()
 

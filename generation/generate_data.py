@@ -20,7 +20,7 @@ file_name = "medium_density.csv"
 with open(file_name, 'w') as csvFile:
     writer = csv.writer(csvFile)
     for src in range(1, 101):
-        for tar in range(1, 21):
+        for tar in range(1, 51):
             if src == tar:
                 continue
             row = src, tar, random.randint(1, 20)
