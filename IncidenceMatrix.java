@@ -153,11 +153,14 @@ public class IncidenceMatrix extends AbstractAssocGraph {
         }
 
         if (k > -1) {
+            List<MyPair> nearestNeigh = new ArrayList<>();
+
             neighbours = sortNearestNeighbours(neighbours);
 
-            for (int i = k; i < neighbours.size(); i++) {
-                neighbours.remove(i);
+            for (int i = 0; i < k; i++) {
+                nearestNeigh.add(neighbours.remove(i));
             }
+            return nearestNeigh;
         }
 
         return neighbours;
@@ -184,11 +187,14 @@ public class IncidenceMatrix extends AbstractAssocGraph {
         }
 
         if (k > -1) {
+            List<MyPair> nearestNeigh = new ArrayList<>();
+
             neighbours = sortNearestNeighbours(neighbours);
 
-            for (int i = k; i < neighbours.size(); i++) {
-                neighbours.remove(i);
+            for (int i = 0; i < k; i++) {
+                nearestNeigh.add(neighbours.remove(i));
             }
+            return nearestNeigh;
         }
 
         return neighbours;
@@ -196,10 +202,10 @@ public class IncidenceMatrix extends AbstractAssocGraph {
 
     public List<MyPair> sortNearestNeighbours(List<MyPair> neighbours) {
 
-        for (int i = 0; i < neighbours.size(); i++){
+        for (int i = 0; i < neighbours.size(); i++) {
             int max = i;
             for (int j = i; j < neighbours.size(); j++) {
-                if (neighbours.get(j).getValue() > neighbours.get(i).getValue()){
+                if (neighbours.get(j).getValue() > neighbours.get(i).getValue()) {
                     max = j;
                 }
             }
